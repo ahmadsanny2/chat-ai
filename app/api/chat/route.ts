@@ -34,11 +34,9 @@ export async function POST(req: Request) {
 
     const reply = completion.choices[0].message.content;
     return Response.json({ response: reply });
-  } catch (error: string) {
-    console.error("[route.ts] ERROR:", error.message);
-    return Response.json(
-      { response: "Maaf, terjadi kesalahan saat memproses permintaan." },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("[route.ts] ERROR:", error.message);
+    }
   }
 }
