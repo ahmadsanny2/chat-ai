@@ -1,4 +1,3 @@
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -14,6 +13,7 @@ interface SideBarProps {
     id: string;
     title: string;
     createdAt: string;
+    messages: { role: string; content: string }[];
   }[];
   activeChatId: string | null;
   onSelect: (id: string) => void;
