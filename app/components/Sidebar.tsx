@@ -12,7 +12,7 @@ interface SideBarProps {
   chatSessions: {
     id: string;
     title: string;
-    createdAt: string;
+    created_at: string;
     messages: { role: string; content: string }[];
   }[];
   activeChatId: string | null;
