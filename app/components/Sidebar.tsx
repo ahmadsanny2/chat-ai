@@ -1,4 +1,4 @@
-import { auto } from "openai/_shims/registry.mjs";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,

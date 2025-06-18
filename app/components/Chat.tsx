@@ -1,5 +1,5 @@
 // Komponen Chat menerima props dari parent dan hanya bertugas menampilkan pesan serta input
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import ReactMarkdown from "react-markdown";
