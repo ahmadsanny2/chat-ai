@@ -57,7 +57,7 @@ export default function Chat({
                 <img
                   src={
                     message.role === "user"
-                      ? "/images/profil.png"
+                      ? "https://placehold.co/50x50?text=U"
                       : "https://placehold.co/50x50?text=AI"
                   }
                   alt=""
