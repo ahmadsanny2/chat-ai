@@ -37,7 +37,7 @@ export default function Chat({
 
   return (
     <div className="h-screen grid grid-rows-[6.9fr_1fr] text-white">
-      <div className="overflow-auto px-5">
+      <div className="overflow-auto px-5" id="scrollbar">
         {/* <div className="bg-[#1a1919] w-full p-2">
           <h1 className="text-xl">Create website Chat AI with Next JS</h1>
         </div> */}
@@ -66,7 +66,7 @@ export default function Chat({
                 />
 
                 <div
-                  className={`${message.role === "user" ? "bg-white/10" : ""}
+                  className={`${message.role === "user" ? "" : "bg-white/10"}
                    text-base leading-relaxed p-2 rounded-xl`}
                 >
                   <ReactMarkdown
