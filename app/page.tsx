@@ -1,3 +1,4 @@
+// File: /app/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +7,6 @@ import Sidebar from "./components/Sidebar";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabase";
 
-// Tipe pesan
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -48,14 +48,7 @@ export default function Home() {
           .from("chat_sessions")
           .insert([newChat]);
 
-        if (insertError) {
-          console.error(
-            "❌ Gagal insert:",
-            insertError.message,
-            insertError.details,
-            insertError.hint
-          );
-        } else {
+        if (!insertError) {
           setChatSessions([newChat]);
           setActiveChatId(newChat.id);
         }
@@ -71,21 +64,13 @@ export default function Home() {
       messages: [],
       created_at: new Date().toISOString(),
     };
-
     const { error: insertError } = await supabase
       .from("chat_sessions")
       .insert([newChat]);
-    if (insertError) {
-      console.error(
-        "❌ Gagal insert:",
-        insertError.message,
-        insertError.details
-      );
-      return;
+    if (!insertError) {
+      setChatSessions([newChat, ...chatSessions]);
+      setActiveChatId(newChat.id);
     }
-
-    setChatSessions([newChat, ...chatSessions]);
-    setActiveChatId(newChat.id);
   };
 
   const handleSubmit = async (text: string) => {
@@ -103,7 +88,6 @@ export default function Home() {
           }
         : c
     );
-
     setChatSessions(updatedSessions);
     setInput("");
     setLoading(true);
@@ -113,27 +97,36 @@ export default function Home() {
         ? text.slice(0, 30)
         : activeChat.title;
 
-    const { error: updateError } = await supabase
+    await supabase
       .from("chat_sessions")
       .update({ messages: updatedMessages, title: updatedTitle })
       .eq("id", activeChat.id);
 
-    if (updateError) {
-      console.error("❌ Gagal update pesan:", updateError.message);
-      return;
-    }
-
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages }),
-      });
+      let aiMsg: Message;
 
-      const data = await res.json();
-      const aiMsg: Message = { role: "assistant", content: data.response };
+      if (text.toLowerCase().startsWith("gambar:")) {
+        const res = await fetch("/api/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text.replace("gambar:", "").trim() }),
+        });
+        const data = await res.json();
+        console.log("🎯 Image data from API:", data);
+
+ 
+        aiMsg = { role: "assistant", content: `![image](${data.image_url})` };
+      } else {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: updatedMessages }),
+        });
+        const data = await res.json();
+        aiMsg = { role: "assistant", content: data.response };
+      }
+
       const finalMessages = [...updatedMessages, aiMsg];
-
       await supabase
         .from("chat_sessions")
         .update({ messages: finalMessages, title: updatedTitle })
@@ -142,7 +135,6 @@ export default function Home() {
       const final = updatedSessions.map((c) =>
         c.id === activeChat.id ? { ...c, messages: finalMessages } : c
       );
-
       setChatSessions(final);
 
       setTimeout(() => {
@@ -150,7 +142,7 @@ export default function Home() {
         if (container) container.scrollTop = container.scrollHeight;
       }, 100);
     } catch (err) {
-      console.error("❌ Error saat fetch AI:", err);
+      console.error("❌ Error:", err);
     } finally {
       setLoading(false);
     }
@@ -160,10 +152,7 @@ export default function Home() {
     await supabase.from("chat_sessions").delete().eq("id", id);
     const filtered = chatSessions.filter((c) => c.id !== id);
     setChatSessions(filtered);
-
-    if (id === activeChatId) {
-      setActiveChatId(filtered[0]?.id || null);
-    }
+    if (id === activeChatId) setActiveChatId(filtered[0]?.id || null);
   };
 
   const handleRenameSession = async (id: string, newTitle: string) => {

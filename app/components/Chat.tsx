@@ -71,6 +71,14 @@ export default function Chat({
                 >
                   <ReactMarkdown
                     components={{
+                      img: ({ src, alt }) => (
+                        <img
+                          src={src || ""}
+                          alt={alt || "image"}
+                          className="mt-2 rounded max-w-xs border border-white/20"
+                        />
+                      ),
+
                       // Paragraf biasa
                       p: ({ children }) => (
                         <p className="mb-3 break-words text-white">
