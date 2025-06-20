@@ -30,8 +30,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ image_url: data.data[0].url });
-  } catch (err: unknown) {
-    console.error("❌ ERROR:", err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("❌ ERROR:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
