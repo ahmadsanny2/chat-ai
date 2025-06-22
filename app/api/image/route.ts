@@ -1,41 +1,38 @@
 import { NextResponse } from "next/server";
+import Replicate from "replicate";
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+});
 
 export async function POST(req: Request) {
-  const { prompt } = await req.json();
-
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/images/generations",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY!}`,
-        },
-        body: JSON.stringify({
-          prompt,
-          n: 1,
-          size: "512x512",
-        }),
-      }
-    );
+    const { prompt } = await req.json();
+    console.log("📥 Prompt masuk:", prompt);
 
-    const data = await response.json();
+    if (!prompt) {
+      return NextResponse.json({ error: "Prompt kosong" }, { status: 400 });
+    }
 
-    console.log("🧪 Hasil response dari OpenAI:", data); // ⬅️ PENTING
+    const output = await replicate.run("black-forest-labs/flux-kontext-max", {
+      input: { prompt },
+    });
 
-    // Jika tidak ada URL dari OpenAI
-    if (!response.ok || !data?.data?.[0]?.url) {
+    const imageUrl = Array.isArray(output) ? output[0] : null;
+
+    if (!imageUrl) {
       return NextResponse.json(
-        { error: "Image URL not found", response: data },
+        { error: "Gambar tidak tersedia" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ image_url: data.data[0].url });
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : "Terjadi kesalahan.";
-    console.error("❌ ERROR:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ image_url: imageUrl });
+  } catch (err: any) {
+    console.error("❌ Error:", err.message || err);
+    return NextResponse.json(
+      { error: err.message || "Terjadi kesalahan." },
+      { status: 500 }
+    );
   }
 }
